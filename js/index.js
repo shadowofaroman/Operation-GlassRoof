@@ -39,24 +39,38 @@ scene.add(mesh);
 
 const hdriUrl = '../HDR/studio_small_09_4k.hdr';
 
- const pmremGenerator = new THREE.PMREMGenerator(renderer);
- pmremGenerator.compileEquirectangularShader();
+const pmremGenerator = new THREE.PMREMGenerator(renderer);
+pmremGenerator.compileEquirectangularShader();
+
+const loaderElement = document.getElementById('loader');
+const fillRect = document.getElementById('fill-level');
+const percentText = document.getElementById('percent');
+const infoText = document.getElementById('info');
 
 new RGBELoader().load(hdriUrl, function (texture) {
 
-     const envMap = pmremGenerator.fromEquirectangular(texture).texture;
-     scene.environment = envMap; 
-     scene.background = new THREE.Color(0x050505);
-     scene.backgroundBlurriness = 0.5;
-     texture.dispose();
-     pmremGenerator.dispose();
+    const envMap = pmremGenerator.fromEquirectangular(texture).texture;
+    scene.environment = envMap; 
+    scene.background = new THREE.Color(0x050505);
+    scene.backgroundBlurriness = 0.5;
+    texture.dispose();
+    pmremGenerator.dispose();
     
-    //texture.mapping = THREE.EquirectangularReflectionMapping;
-    //scene.environment = texture; 
-    //scene.background = texture;  
-            
-    //scene.backgroundBlurriness = 0.5;
-});
+    loaderElement.style.opacity = '0';
+    infoText.style.opacity = '1';
+    setTimeout(() => {
+        loaderElement.style.display = 'none';
+    }, 800);
+},
+function (xhr) {
+    if (xhr.lengthComputable) {
+        const percentComplete = xhr.loaded / xhr.total;
+        percentText.innerText = Math.round(percentComplete * 100) + '%';
+        const newY = 100 - (percentComplete * 100);
+        fillRect.setAttribute('y', newY);
+    }
+}
+);
 
 function animate() {
     requestAnimationFrame(animate);
